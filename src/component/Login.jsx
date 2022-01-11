@@ -1,8 +1,9 @@
 import React from 'react';
 
-
+import {auth, db} from '../firebase'
 import {createUserWithEmailAndPassword } from 'firebase/auth';
-import {auth} from '../firebase'
+import { /*collection, addDoc, */doc, setDoc } from "firebase/firestore";
+
 
 const Login = () => {
 
@@ -12,9 +13,21 @@ const Login = () => {
     const [esRegistro, setEsRegistro]=React.useState(true);
 
     const register = async () => {
+
         try {
-            const user = await createUserWithEmailAndPassword(auth, email, pass)    
-            console.log(user);
+            const res = await createUserWithEmailAndPassword(auth, email, pass)   
+            console.log(res); 
+            /* Con id autogenerado
+            const docRef = await addDoc(collection(db, "usuarios"), {
+                email: res.user.email,
+                uid: res.user.uid
+            });
+            console.log("Document written with ID: ", docRef.id);*/
+            /* Con id asignado*/
+            await setDoc(doc(db, "usuarios", res.user.email), {
+                email: res.user.email,
+                uid: res.user.uid
+            });
         } catch (error) {
             if(error.code === 'auth/invalid-email'){
                 setError("Email Ingresado no es válido");
@@ -22,6 +35,7 @@ const Login = () => {
             if(error.code === 'auth/email-already-in-use'){
                 setError("Email Ingresado ya esta en uso");
             }
+            console.error("Error adding document: ", error);
             /*console.log(error.code);
             console.log(error.message);*/
         }
