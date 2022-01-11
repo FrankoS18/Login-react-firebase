@@ -1,8 +1,9 @@
 import React from 'react';
 
 import {auth, db} from '../firebase'
-import {createUserWithEmailAndPassword } from 'firebase/auth';
+import {createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { /*collection, addDoc, */doc, setDoc } from "firebase/firestore";
+// para obtener datos es mejor snapshot que getdocs
 
 
 const Login = () => {
@@ -10,7 +11,30 @@ const Login = () => {
     const [email, setEmail]=React.useState('');
     const [pass, setPass]=React.useState('');
     const [error, setError]=React.useState(null);
-    const [esRegistro, setEsRegistro]=React.useState(true);
+    const [esRegistro, setEsRegistro]=React.useState(false);
+
+
+    const singIn = async () => {
+        try {
+            const res = await signInWithEmailAndPassword(auth, email, pass)
+            console.log(res.user)
+            
+        } catch (error) {
+            console.log(error)
+            if(error.code === 'auth/invalid-email'){
+                setError("Email Ingresado no es válido");
+                return
+            }
+            if(error.code === 'auth/user-not-found'){
+                setError('Usuario no registrado')
+                return
+            }
+            if(error.code === 'auth/wrong-password'){
+                setError('Contraseña incorrecta')
+                return
+            }
+        }
+    }
 
     const register = async () => {
 
@@ -28,14 +52,21 @@ const Login = () => {
                 email: res.user.email,
                 uid: res.user.uid
             });
+
+            setEmail('');
+            setPass('');
+            setError(null);
+
         } catch (error) {
             if(error.code === 'auth/invalid-email'){
                 setError("Email Ingresado no es válido");
+                return
             }
             if(error.code === 'auth/email-already-in-use'){
                 setError("Email Ingresado ya esta en uso");
+                return
             }
-            console.error("Error adding document: ", error);
+            console.error("Error al agregar documento: ", error);
             /*console.log(error.code);
             console.log(error.message);*/
         }
@@ -49,13 +80,11 @@ const Login = () => {
             setError('Ingrese Email')
             return
         }
-
         if(!pass.trim()){
             //console.log('Ingrese Pass')
             setError('Ingrese Pass')
             return
         }
-
         if (pass.length<6) {
             //console.log('Pass debe tener 6 o más carácteres')
             setError('Pass debe tener 6 o más carácteres')
@@ -65,10 +94,10 @@ const Login = () => {
         setError(null)
 
         if(esRegistro){
-            
             register()
+        }else{
+            singIn()
         }
-
     }
 
 
