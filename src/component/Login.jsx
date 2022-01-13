@@ -4,9 +4,10 @@ import {auth, db} from '../firebase'
 import {createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { /*collection, addDoc, */doc, setDoc } from "firebase/firestore";
 // para obtener datos es mejor snapshot que getdocs
+import {withRouter } from 'react-router';
 
 
-const Login = () => {
+const Login = (props) => {
 
     const [email, setEmail]=React.useState('');
     const [pass, setPass]=React.useState('');
@@ -18,6 +19,11 @@ const Login = () => {
         try {
             const res = await signInWithEmailAndPassword(auth, email, pass)
             console.log(res.user)
+            setEmail('');
+            setPass('');
+            setError(null);
+
+            props.history.push('/admin')
             
         } catch (error) {
             console.log(error)
@@ -56,6 +62,8 @@ const Login = () => {
             setEmail('');
             setPass('');
             setError(null);
+
+            props.history.push('/admin')
 
         } catch (error) {
             if(error.code === 'auth/invalid-email'){
@@ -154,4 +162,4 @@ const Login = () => {
     )
 }
 
-export default Login
+export default withRouter(Login)
